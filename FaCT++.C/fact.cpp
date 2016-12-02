@@ -17,9 +17,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#include <fstream>
+
 #include "fact.h"
 #include "Kernel.h"
 #include "Actor.h"
+#include "parser.h"
 
 /// class for acting with a taxonomy at a C level
 class CActor: public Actor
@@ -122,6 +125,21 @@ void fact_reasoning_kernel_free (fact_reasoning_kernel *k)
 {
 	delete k->p;
 	delete k;
+}
+
+int fact_reasoning_kernel_load_lisp_facts(fact_reasoning_kernel *k,const char* tBoxName)
+{
+    // Open input file for TBox and so on...
+    std::ifstream iTBox ( tBoxName );
+    if ( iTBox.fail () )
+        return 0;
+    // Load the ontology
+    DLLispParser TBoxParser ( &iTBox, k->p );
+
+    // parsing input TBox
+    TBoxParser.Parse ();
+
+    return 1;
 }
 
 /*

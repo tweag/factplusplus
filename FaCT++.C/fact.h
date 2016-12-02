@@ -64,6 +64,7 @@ const char *fact_get_version ();
 
 fact_reasoning_kernel *fact_reasoning_kernel_new (void);
 void fact_reasoning_kernel_free (fact_reasoning_kernel *);
+int fact_reasoning_kernel_load_lisp_facts(fact_reasoning_kernel *,const char *);
 
 /*
 ifOptionSet* getOptions (  );

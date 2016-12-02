@@ -56,6 +56,8 @@ SOURCES = \
           SaveLoadManager.cpp\
           dir_util.cpp\
           LocalityChecker.cpp\
+          parser.cpp\
+          scanner.cpp\
 
 
 include ../Makefile.include
