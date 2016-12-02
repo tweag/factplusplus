@@ -1,0 +1,25 @@
+name:                hfact
+version:             0.1.0.0
+synopsis:            Haskell bindings for fact++ reasoner
+description:         Please see README.md
+author:              Nicolas Mattia
+maintainer:          nicolas.mattia@tweag.io
+category:            Web
+build-type:          Simple
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     HFact
+                       HFact.C.Types
+  build-depends:       base >= 4.7 && < 5
+  default-language:    Haskell2010
+  extra-libraries:     fact
+
+test-suite hfact-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Main.hs
+  build-depends:       base >= 4.7 && < 5
+                     , hfact
+  default-language:    Haskell2010
