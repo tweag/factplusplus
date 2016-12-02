@@ -22,3 +22,6 @@ fpp_lisp: kernel
 fpp_jni: kernel
 	make -C FaCT++.JNI
 
+.PHONY: fpp_c
+fpp_c: kernel
+	make -C FaCT++.C
