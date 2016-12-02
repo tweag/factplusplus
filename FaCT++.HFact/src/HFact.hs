@@ -14,6 +14,7 @@ import HFact.C.Types
 foreign import ccall unsafe "fact.h fact_get_version" c_fact_get_version :: IO CString
 foreign import ccall unsafe "fact.h fact_reasoning_kernel_new" c_fact_reasoning_kernel_new :: IO CReasoningKernel
 foreign import ccall unsafe "fact.h &fact_reasoning_kernel_free" c_fact_reasoning_kernel_free :: FunPtr (Ptr CReasoningKernel -> IO ())
+foreign import ccall unsafe "fact.h fact_reasoning_kernel_load_lisp_facts" c_fact_reasoning_kernel_load_lisp_facts :: CReasoningKernel -> CString -> IO Int
 
 foreign import ccall unsafe "fact.h fact_is_kb_consistent" c_fact_is_kb_consistent :: CReasoningKernel -> IO CInt
 foreign import ccall unsafe "fact.h fact_preprocess_kb" c_fact_preprocess_kb :: CReasoningKernel -> IO ()
@@ -217,3 +218,10 @@ getElements2D act =
 
 nullCString :: CString
 nullCString = nullPtr
+
+loadLispFacts :: ReasoningKernel -> FilePath -> IO Bool
+loadLispFacts k str = do
+  cStr <- newCString str
+  n <- withForeignPtr k $ \k' ->
+    c_fact_reasoning_kernel_load_lisp_facts (CReasoningKernel k') cStr
+  case n of { 0 -> return False; _ -> return True }
