@@ -50,6 +50,9 @@ foreign import ccall unsafe "fact.h fact_get_real_data_type" c_fact_get_real_dat
 foreign import ccall unsafe "fact.h fact_get_bool_data_type" c_fact_get_bool_data_type :: CReasoningKernel -> IO CDataTypeExpression
 foreign import ccall unsafe "fact.h fact_get_time_data_type" c_fact_get_time_data_type :: CReasoningKernel -> IO CDataTypeExpression
 
+foreign import ccall unsafe "fact.h fact_o_value" c_fact_o_value :: CReasoningKernel -> CObjectRoleExpression -> CIndividualExpression -> IO CConceptExpression
+foreign import ccall unsafe "fact.h fact_inverse" c_fact_inverse :: CReasoningKernel -> CObjectRoleExpression -> IO CObjectRoleExpression
+
 individual, mkIndividual :: ReasoningKernel -> String -> IO IndividualExpression
 individual k str = do
   cStr <- newCString str
@@ -202,6 +205,16 @@ isInstance :: ReasoningKernel -> IndividualExpression -> ConceptExpression -> IO
 isInstance k i c = do
   n <- withForeignPtr k $ \ptr -> c_fact_is_instance (CReasoningKernel ptr) i c
   case n of { 0 -> return False; _ -> return True }
+
+objectValueRestriction :: ReasoningKernel -> ObjectRoleExpression -> IndividualExpression -> IO ConceptExpression
+objectValueRestriction k i c =
+  withForeignPtr k $ \ptr -> do
+    c_fact_o_value (CReasoningKernel ptr) i c
+
+objectRoleInverse :: ReasoningKernel -> ObjectRoleExpression -> IO ObjectRoleExpression
+objectRoleInverse k r =
+  withForeignPtr k $ \ptr -> do
+    c_fact_inverse (CReasoningKernel ptr) r
 
 getElements1D :: Actor -> IO [String]
 getElements1D act =
