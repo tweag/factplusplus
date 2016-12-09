@@ -2,6 +2,7 @@ module HFact
   ( module HFact.C.Types
   , module HFact) where
 
+import Control.Monad (forM_)
 import Foreign.C.String
 import Foreign.C.Types
 import Foreign.ForeignPtr
@@ -52,6 +53,29 @@ foreign import ccall unsafe "fact.h fact_get_time_data_type" c_fact_get_time_dat
 
 foreign import ccall unsafe "fact.h fact_o_value" c_fact_o_value :: CReasoningKernel -> CObjectRoleExpression -> CIndividualExpression -> IO CConceptExpression
 foreign import ccall unsafe "fact.h fact_inverse" c_fact_inverse :: CReasoningKernel -> CObjectRoleExpression -> IO CObjectRoleExpression
+
+data SomeExpression
+foreign import ccall unsafe "fact.h fact_new_arg_list" c_fact_new_arg_list :: CReasoningKernel -> IO ()
+foreign import ccall unsafe "fact.h fact_add_arg" c_fact_add_arg :: CReasoningKernel -> Ptr SomeExpression -> IO ()
+
+newtype ArgList = ArgList [Ptr SomeExpression]
+upcastConcepts :: [ConceptExpression] -> ArgList
+upcastConcepts = ArgList . map (\(CConceptExpression ptr) -> castPtr ptr) 
+upcastIndividuals :: [IndividualExpression] -> ArgList
+upcastIndividuals = ArgList . map (\(CIndividualExpression ptr) -> castPtr ptr)
+upcastObjectRole :: [ObjectRoleExpression] -> ArgList
+upcastObjectRole = ArgList . map (\(CObjectRoleExpression ptr) -> castPtr ptr)
+
+
+registerFactArgList :: ReasoningKernel -> ArgList -> IO ()
+registerFactArgList k (ArgList ptrs) =
+  withForeignPtr k $ \ptr -> do
+    c_fact_new_arg_list (CReasoningKernel ptr)
+    forM_ ptrs (c_fact_add_arg (CReasoningKernel ptr))
+
+foreign import ccall unsafe "fact.h fact_not" c_fact_not :: CReasoningKernel -> CConceptExpression -> IO CConceptExpression
+
+foreign import ccall unsafe "fact.h fact_and" c_fact_and :: CReasoningKernel -> IO CConceptExpression
 
 individual, mkIndividual :: ReasoningKernel -> String -> IO IndividualExpression
 individual k str = do
@@ -210,6 +234,17 @@ objectValueRestriction :: ReasoningKernel -> ObjectRoleExpression -> IndividualE
 objectValueRestriction k i c =
   withForeignPtr k $ \ptr -> do
     c_fact_o_value (CReasoningKernel ptr) i c
+
+conceptNegation :: ReasoningKernel -> ConceptExpression -> IO ConceptExpression
+conceptNegation k c = do
+  withForeignPtr k $ \ptr ->
+    c_fact_not (CReasoningKernel ptr) c
+
+andConcepts :: ReasoningKernel -> [ConceptExpression] -> IO ConceptExpression
+andConcepts k cs = do
+  registerFactArgList k (upcastConcepts cs)
+  withForeignPtr k $ \ptr ->
+    c_fact_and (CReasoningKernel ptr)
 
 objectRoleInverse :: ReasoningKernel -> ObjectRoleExpression -> IO ObjectRoleExpression
 objectRoleInverse k r =
