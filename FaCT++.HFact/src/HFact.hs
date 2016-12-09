@@ -77,6 +77,10 @@ foreign import ccall unsafe "fact.h fact_not" c_fact_not :: CReasoningKernel -> 
 
 foreign import ccall unsafe "fact.h fact_and" c_fact_and :: CReasoningKernel -> IO CConceptExpression
 
+foreign import ccall unsafe "fact.h fact_o_forall" c_fact_o_forall :: CReasoningKernel -> CObjectRoleExpression -> CConceptExpression -> IO CConceptExpression
+
+foreign import ccall unsafe "fact.h fact_one_of" c_fact_one_of :: CReasoningKernel -> IO CConceptExpression
+
 individual, mkIndividual :: ReasoningKernel -> String -> IO IndividualExpression
 individual k str = do
   cStr <- newCString str
@@ -246,6 +250,17 @@ andConcepts k cs = do
   withForeignPtr k $ \ptr ->
     c_fact_and (CReasoningKernel ptr)
 
+forallRestriction :: ReasoningKernel -> ObjectRoleExpression -> ConceptExpression -> IO ConceptExpression
+forallRestriction k role c =
+  withForeignPtr k $ \ptr ->
+    c_fact_o_forall (CReasoningKernel ptr) role c
+
+objectOneOfRestriction :: ReasoningKernel -> [IndividualExpression] -> IO ConceptExpression
+objectOneOfRestriction k indivs = do
+  registerFactArgList k (upcastIndividuals indivs)
+  withForeignPtr k $ \ptr ->
+    c_fact_one_of (CReasoningKernel ptr)
+    
 objectRoleInverse :: ReasoningKernel -> ObjectRoleExpression -> IO ObjectRoleExpression
 objectRoleInverse k r =
   withForeignPtr k $ \ptr -> do
