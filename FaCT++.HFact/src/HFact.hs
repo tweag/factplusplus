@@ -214,6 +214,11 @@ newConceptActor =
   c_fact_concept_actor_new >>= \(CActor ptr) ->
   newForeignPtr c_fact_actor_free ptr
 
+newIndividualActor :: IO Actor
+newIndividualActor =
+  c_fact_individual_actor_new >>= \(CActor ptr) ->
+  newForeignPtr c_fact_actor_free ptr
+
 getSubConcepts :: ReasoningKernel -> ConceptExpression -> RelativesInfo -> IO Actor
 getSubConcepts k c rInfo =
   withForeignPtr k $ \ptr -> do
@@ -227,7 +232,7 @@ getSubConcepts k c rInfo =
 getInstances :: ReasoningKernel -> ConceptExpression -> IO Actor
 getInstances k c =
   withForeignPtr k $ \ptr -> do
-    (CActor actorPtr) <- c_fact_concept_actor_new
+    (CActor actorPtr) <- c_fact_individual_actor_new
     alloca $ \actorPtrPtr -> do
       poke actorPtrPtr actorPtr
       c_fact_get_instances (CReasoningKernel ptr) c actorPtrPtr
