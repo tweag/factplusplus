@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Kernel.h"
 #include "Actor.h"
 #include "parser.h"
+#include "configure.h"
 
 /// class for acting with a taxonomy at a C level
 class CActor: public Actor
@@ -892,4 +893,18 @@ fact_facet_expression* fact_facet_max_inclusive ( fact_reasoning_kernel *k,fact_
 fact_facet_expression* fact_facet_max_exclusive ( fact_reasoning_kernel *k,fact_data_value_expression* v )
 {
 	return new fact_facet_expression(k->p->getExpressionManager()->FacetMaxExclusive(v->p));
+}
+
+int fact_load_configuration ( fact_reasoning_kernel *k, char* file) {
+  Configuration cfg;
+  if (cfg.Load(file))
+    return 1;
+  if (k->p->getOptions()->initByConfigure(cfg, "Tuning"))
+    return 1;
+  std::cerr << "Using options from file " << file << "\n";
+  return 0;
+}
+
+void fact_set_dump_ontology ( fact_reasoning_kernel *k, int mustDump ) {
+  k->p->setDumpOntology(mustDump);
 }

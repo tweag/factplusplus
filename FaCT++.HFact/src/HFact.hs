@@ -81,6 +81,10 @@ foreign import ccall unsafe "fact.h fact_o_forall" c_fact_o_forall :: CReasoning
 
 foreign import ccall unsafe "fact.h fact_one_of" c_fact_one_of :: CReasoningKernel -> IO CConceptExpression
 
+foreign import ccall unsafe "fact.h fact_load_configuration" c_fact_load_configuration :: CReasoningKernel -> CString -> IO CInt
+
+foreign import ccall unsafe "fact.h fact_set_dump_ontology" c_fact_set_dump_ontology :: CReasoningKernel -> CInt -> IO ()
+
 individual, mkIndividual :: ReasoningKernel -> String -> IO IndividualExpression
 individual k str = do
   cStr <- newCString str
@@ -288,3 +292,16 @@ loadLispFacts k str = do
   n <- withForeignPtr k $ \k' ->
     c_fact_reasoning_kernel_load_lisp_facts (CReasoningKernel k') cStr
   case n of { 0 -> return False; _ -> return True }
+
+loadConfiguration :: ReasoningKernel -> FilePath -> IO Bool
+loadConfiguration k path =
+  withCString path $ \pathPtr -> do
+    n <- withForeignPtr k $ \ptr ->
+           c_fact_load_configuration (CReasoningKernel ptr) pathPtr
+    return $ case n of 0 -> False
+                       1 -> True
+
+setDumpOntology :: ReasoningKernel -> Bool -> IO ()
+setDumpOntology k b = do
+  withForeignPtr k $ \ptr -> do
+    c_fact_set_dump_ontology (CReasoningKernel ptr) (fromIntegral $ fromEnum b)
