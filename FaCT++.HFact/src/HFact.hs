@@ -44,6 +44,7 @@ foreign import ccall unsafe "fact.h fact_get_direct_instances" c_fact_get_instan
 foreign import ccall unsafe "fact.h fact_get_elements_1d" c_fact_get_elements_1d :: CActor -> IO (Ptr CString)
 foreign import ccall unsafe "fact.h fact_get_elements_2d" c_fact_get_elements_2d :: CActor -> IO (Ptr (Ptr CString))
 foreign import ccall unsafe "fact.h fact_is_instance" c_fact_is_instance :: CReasoningKernel -> CIndividualExpression -> CConceptExpression -> IO CInt
+foreign import ccall unsafe "fact.h fact_is_subsumed_by" c_fact_is_subsumed_by :: CReasoningKernel -> CConceptExpression -> CConceptExpression -> IO CInt
 
 foreign import ccall unsafe "fact.h fact_get_str_data_type" c_fact_get_str_data_type :: CReasoningKernel -> IO CDataTypeExpression
 foreign import ccall unsafe "fact.h fact_get_int_data_type" c_fact_get_int_data_type :: CReasoningKernel -> IO CDataTypeExpression
@@ -241,6 +242,11 @@ getInstances k c =
 isInstance :: ReasoningKernel -> IndividualExpression -> ConceptExpression -> IO Bool
 isInstance k i c = do
   n <- withForeignPtr k $ \ptr -> c_fact_is_instance (CReasoningKernel ptr) i c
+  case n of { 0 -> return False; _ -> return True }
+
+isSubsumedBy :: ReasoningKernel -> ConceptExpression -> ConceptExpression -> IO Bool
+isSubsumedBy k c1 c2 = do
+  n <- withForeignPtr k $ \ptr -> c_fact_is_subsumed_by (CReasoningKernel ptr) c1 c2
   case n of { 0 -> return False; _ -> return True }
 
 objectValueRestriction :: ReasoningKernel -> ObjectRoleExpression -> IndividualExpression -> IO ConceptExpression
