@@ -40,11 +40,12 @@ foreign import ccall unsafe "fact.h fact_value_of" c_fact_value_of :: CReasoning
 foreign import ccall unsafe "fact.h fact_instance_of" c_fact_instance_of :: CReasoningKernel -> CIndividualExpression -> CConceptExpression -> IO CAxiom
 
 foreign import ccall unsafe "fact.h fact_get_sub_concepts" c_fact_get_sub_concepts :: CReasoningKernel -> CConceptExpression -> CInt -> Ptr (Ptr CActor) -> IO ()
-foreign import ccall unsafe "fact.h fact_get_direct_instances" c_fact_get_instances :: CReasoningKernel -> CConceptExpression -> Ptr (Ptr CActor) -> IO ()
+foreign import ccall unsafe "fact.h fact_get_instances" c_fact_get_instances :: CReasoningKernel -> CConceptExpression -> Ptr (Ptr CActor) -> IO ()
 foreign import ccall unsafe "fact.h fact_get_elements_1d" c_fact_get_elements_1d :: CActor -> IO (Ptr CString)
 foreign import ccall unsafe "fact.h fact_get_elements_2d" c_fact_get_elements_2d :: CActor -> IO (Ptr (Ptr CString))
 foreign import ccall unsafe "fact.h fact_is_instance" c_fact_is_instance :: CReasoningKernel -> CIndividualExpression -> CConceptExpression -> IO CInt
 foreign import ccall unsafe "fact.h fact_is_subsumed_by" c_fact_is_subsumed_by :: CReasoningKernel -> CConceptExpression -> CConceptExpression -> IO CInt
+foreign import ccall unsafe "fact.h fact_is_equivalent" c_fact_is_equivalent :: CReasoningKernel -> CConceptExpression -> CConceptExpression -> IO CInt
 
 foreign import ccall unsafe "fact.h fact_get_str_data_type" c_fact_get_str_data_type :: CReasoningKernel -> IO CDataTypeExpression
 foreign import ccall unsafe "fact.h fact_get_int_data_type" c_fact_get_int_data_type :: CReasoningKernel -> IO CDataTypeExpression
@@ -247,6 +248,11 @@ isInstance k i c = do
 isSubsumedBy :: ReasoningKernel -> ConceptExpression -> ConceptExpression -> IO Bool
 isSubsumedBy k c1 c2 = do
   n <- withForeignPtr k $ \ptr -> c_fact_is_subsumed_by (CReasoningKernel ptr) c1 c2
+  case n of { 0 -> return False; _ -> return True }
+
+isEquivalent :: ReasoningKernel -> ConceptExpression -> ConceptExpression -> IO Bool
+isEquivalent k c1 c2 = do
+  n <- withForeignPtr k $ \ptr -> c_fact_is_equivalent (CReasoningKernel ptr) c1 c2
   case n of { 0 -> return False; _ -> return True }
 
 objectValueRestriction :: ReasoningKernel -> ObjectRoleExpression -> IndividualExpression -> IO ConceptExpression

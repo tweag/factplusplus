@@ -537,10 +537,18 @@ void fact_get_direct_instances (fact_reasoning_kernel *k,
 {
 	k->p->getDirectInstances(c->p,*(*actor)->p);
 }
-void fact_get_instances (fact_reasoning_kernel *k, fact_concept_expression *c,
+int fact_get_instances (fact_reasoning_kernel *k, fact_concept_expression *c,
 		fact_actor **actor)
 {
-	k->p->getInstances(c->p,*(*actor)->p);
+  using namespace std;
+  try{
+    k->p->getInstances(c->p,*(*actor)->p);
+  }
+  catch (exception& e){
+    cout << "Exception: " << e.what() << endl;
+    return 0;
+  }
+  return 1;
 }
 void fact_get_types (fact_reasoning_kernel *k, fact_individual_expression *i,
 		int direct, fact_actor **actor)

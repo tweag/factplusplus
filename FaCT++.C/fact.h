@@ -231,7 +231,7 @@ void fact_get_role_range (fact_reasoning_kernel *, fact_o_role_expression *r,
 		int direct, fact_actor **actor);
 void fact_get_direct_instances (fact_reasoning_kernel *,
 		fact_concept_expression *c, fact_actor **actor);
-void fact_get_instances (fact_reasoning_kernel *, fact_concept_expression *c,
+int fact_get_instances (fact_reasoning_kernel *, fact_concept_expression *c,
 		fact_actor **actor);
 void fact_get_types (fact_reasoning_kernel *, fact_individual_expression *i,
 		int direct, fact_actor **actor);
