@@ -545,7 +545,7 @@ int fact_get_instances (fact_reasoning_kernel *k, fact_concept_expression *c,
     k->p->getInstances(c->p,*(*actor)->p);
   }
   catch (exception& e){
-    cout << "Exception: " << e.what() << endl;
+    //cout << "Exception: " << e.what() << endl;
     return 0;
   }
   return 1;
