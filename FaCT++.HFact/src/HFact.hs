@@ -40,7 +40,7 @@ foreign import ccall unsafe "fact.h fact_value_of" c_fact_value_of :: CReasoning
 foreign import ccall unsafe "fact.h fact_instance_of" c_fact_instance_of :: CReasoningKernel -> CIndividualExpression -> CConceptExpression -> IO CAxiom
 
 foreign import ccall unsafe "fact.h fact_get_sub_concepts" c_fact_get_sub_concepts :: CReasoningKernel -> CConceptExpression -> CInt -> Ptr (Ptr CActor) -> IO ()
-foreign import ccall unsafe "fact.h fact_get_instances" c_fact_get_instances :: CReasoningKernel -> CConceptExpression -> Ptr (Ptr CActor) -> IO ()
+foreign import ccall unsafe "fact.h fact_get_instances" c_fact_get_instances :: CReasoningKernel -> CConceptExpression -> Ptr (Ptr CActor) -> IO CInt
 foreign import ccall unsafe "fact.h fact_get_elements_1d" c_fact_get_elements_1d :: CActor -> IO (Ptr CString)
 foreign import ccall unsafe "fact.h fact_get_elements_2d" c_fact_get_elements_2d :: CActor -> IO (Ptr (Ptr CString))
 foreign import ccall unsafe "fact.h fact_is_instance" c_fact_is_instance :: CReasoningKernel -> CIndividualExpression -> CConceptExpression -> IO CInt
@@ -231,14 +231,16 @@ getSubConcepts k c rInfo =
       newForeignPtr c_fact_actor_free actorPtr
   where direct = case rInfo of { Direct -> 1 ; All -> 0 }
 
-getInstances :: ReasoningKernel -> ConceptExpression -> IO Actor
+getInstances :: ReasoningKernel -> ConceptExpression -> IO (Maybe Actor)
 getInstances k c =
   withForeignPtr k $ \ptr -> do
     (CActor actorPtr) <- c_fact_individual_actor_new
     alloca $ \actorPtrPtr -> do
       poke actorPtrPtr actorPtr
-      c_fact_get_instances (CReasoningKernel ptr) c actorPtrPtr
-      newForeignPtr c_fact_actor_free actorPtr
+      n <- c_fact_get_instances (CReasoningKernel ptr) c actorPtrPtr
+      fp <- newForeignPtr c_fact_actor_free actorPtr
+      return $ case n of 0 -> Nothing
+                         _ -> Just fp
 
 isInstance :: ReasoningKernel -> IndividualExpression -> ConceptExpression -> IO Bool
 isInstance k i c = do
