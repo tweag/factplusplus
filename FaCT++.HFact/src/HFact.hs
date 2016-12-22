@@ -318,7 +318,7 @@ loadConfiguration k path =
     n <- withForeignPtr k $ \ptr ->
            c_fact_load_configuration (CReasoningKernel ptr) pathPtr
     return $ case n of 0 -> False
-                       1 -> True
+                       _ -> True
 
 setDumpOntology :: ReasoningKernel -> Bool -> IO ()
 setDumpOntology k b = do
